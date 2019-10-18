@@ -1,12 +1,23 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"time"
 )
+
+type state struct {
+	MouseX float64 `json:"mouseX"`
+	MouseY float64 `json:"mouseY"`
+}
+
+func (s state) String() string {
+	return fmt.Sprintf("%d, %d", s.MouseX, s.MouseY)
+}
+
+var clientState state = state{MouseX: 17, MouseY: 17}
 
 func main() {
 	if len(os.Args) == 1 {
@@ -22,10 +33,20 @@ func main() {
 
 	defer conn.Close()
 
+	endcoder, decoder := json.NewEncoder(conn), json.NewDecoder(conn)
 	for {
-		fmt.Fprintf(conn, "DATA FROM CLIENT\n")
-		msg, _ := bufio.NewReader(conn).ReadString('\n')
-		fmt.Print("Server -> " + msg)
+		fmt.Println("Client >> ", clientState)
+		err = endcoder.Encode(&clientState)
+		if err != nil {
+			panic(err)
+		}
+		// fmt.Fprintf(conn, "DATA FROM CLIENT\n")
+		// msg, _ := bufio.NewReader(conn).ReadString('\n')
+		err = decoder.Decode(&clientState)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Server -> ", clientState)
 		time.Sleep(time.Second * 3)
 	}
 }
