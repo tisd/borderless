@@ -40,8 +40,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		// fmt.Fprintf(conn, "DATA FROM CLIENT\n")
-		// msg, _ := bufio.NewReader(conn).ReadString('\n')
 		err = decoder.Decode(&clientState)
 		if err != nil {
 			panic(err)
